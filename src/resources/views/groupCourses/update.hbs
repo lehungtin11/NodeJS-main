@@ -1,0 +1,76 @@
+<div class="mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {{#with data}}
+            <form
+                method="POST"
+                action="/group-courses/updated?slug={{_id}}&_method=PUT"
+            >
+            {{/with}}
+              {{#with data}}
+                <div class="mb-3">
+                    <label for="floatingSelect">
+                        Khoá học
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="name"
+                        name="name"
+                        autocomplete="off"
+                        value="{{name}}"
+                    />
+                </div>
+                <div class="mb-3">
+                    <label for="title" class="form-label">
+                       Tên khóa học
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="title"
+                        name="title"
+                        autocomplete="off"
+                        value="{{title}}"
+                    />
+                </div>
+                <div class="mb-3">
+                    <label for="type" class="form-label">
+                        Khóa học thuộc loại
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="type"
+                        name="type"
+                        value="{{type}}"/>
+                </div>
+                <div class="mb-3">
+                    <label for="thumbnail" class="form-label">
+                        Thumbnail
+                    </label>
+                    <div class="d-flex">
+                        <img
+                            style="border-radius: 16px; height: 120px; object-fit: cover;"
+                            src="/img/home/{{thumbnail}}"
+                            class="card-img-top"
+                            alt="{{thumbnail}}"
+                        />
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="thumbnail"
+                          name="thumbnail"
+                          value="{{thumbnail}}"
+                        />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-dark fw-bold">
+                    <i class="bi bi-pencil-square"></i>
+                    Cập nhật
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+    {{/with}}

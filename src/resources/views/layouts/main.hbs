@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;600;800&display=swap" rel="stylesheet">
+    <title>MeTub - học lập trình để đi làm! | Học lập trình online</title>
+</head>
+<body>
+    <div id="animLoader" class="loader">
+        <section>
+            <span class="loader-content">
+            </span>
+        </section>
+    </div>
+    {{! "Parameter" use data from "username" to render data. Which template have header }}
+    {{! In this case, data get from res.locals.username }}
+    {{> header parameter=username avatar=avatar}}
+    <div class="container body">
+        <div id="chatBox" class="hide">
+            <div id="box-header" class="chatBox__header d-flex justify-content-between">
+                <span class="chatBox__header-content">Tán gẫu</span>
+                <i class="bi bi-dash-lg chatBox__header-icon"></i>
+            </div>
+            <div id="chatBoxContent" class="chatBox__content">
+                <span style="display: none" id="chatBoxUsername">{{username}}</span>
+                {{!-- Append child here --}}
+            </div>
+            <form id="formMessage" method="POST" class="chatBox__input">
+                <input id="inputMessage" type="text" placeholder="Aa" autocomplete="off">
+                <button type="submit"><i class="bi bi-send-fill"></i></button>
+            </form>
+        </div>
+        <div id="chat"><i class="bi bi-messenger">
+            <span id="notifyMessages">
+                <span>0</span>
+            </span>
+        </i></div>
+        <div id="gotop"><i class="bi bi-arrow-up-square"></i></div>
+        {{{body}}}
+    </div>
+    {{> footer}}
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous"></script>
+<script>
+    //---------- Go Top button
+    const goTop = document.querySelector('#gotop')
+    const chat = document.querySelector('#chat')
+    const chatBox = document.querySelector('#chatBox')
+    const boxHeader = document.querySelector('#box-header')
+
+    window.addEventListener('scroll', (e) => {
+        if(window.scrollY > 200) {
+            goTop.style.display = 'block'
+        } else if(window.scrollY <= 10){
+            goTop.style.display = 'none'
+        }
+    })
+
+    boxHeader.onclick = () => {
+        chatBox.classList.toggle('hide')
+    }
+
+    chat.onclick = () => {
+        chatBox.classList.toggle('hide')
+    }
+    goTop.onclick = () => {
+        window.scrollTo(0, 0)
+    }
+</script>
+{{!-- SOCKET IO --}}
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var loader = document.getElementById('animLoader')
+    addEventListener('beforeunload', (event) => {
+        loader.setAttribute('style','opacity: 1')
+    })
+    window.addEventListener('DOMContentLoaded', (event) => {
+        loader.setAttribute('style','opacity: 0')
+    })
+    addEventListener('DOMContentLoaded', (event) => {
+    var socket = io();
+
+    var formMessage = document.getElementById('formMessage');
+    var inputMessage = document.getElementById('inputMessage');
+    var chatBoxContent = document.querySelector('#chatBoxContent');
+    var chatBoxUsername = document.querySelector('#chatBoxUsername');
+    var notifyMessages = document.querySelector('#notifyMessages span');
+    var adminName = 'Administrators';
+    if(chatBoxUsername.innerText == 'Lehungtin11') chatBoxUsername.innerText = adminName
+    
+
+        formMessage.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (inputMessage.value) {
+                socket.emit('chat message', {message: inputMessage.value,username: chatBoxUsername.innerText});
+                socket.emit('notify count', chatBoxContent.children.length);
+                inputMessage.value = '';
+                chatBoxContent.scrollTo(0,chatBoxContent.scrollHeight)
+            }
+        });
+
+        socket.on('notify count', (msg) => {
+            notifyMessages.innerText=msg
+            if(parseInt(notifyMessages.innerText)>99) notifyMessages.innerText = '+99'
+        })
+
+        socket.on('chat message', (msg) => {
+            const timeElapsed = Date.now();
+            const today = new Date(timeElapsed);
+            var div = document.createElement('div')
+            div.classList.add('wrapper-content')
+            var p = document.createElement('p')
+            p.classList.add('user-name')
+            p.innerText = msg.username
+            var p2 = document.createElement('p')
+            p2.classList.add('message')
+            p2.innerText = msg.message
+            var p3 = document.createElement('p')
+            p3.classList.add('chatTime')
+            p3.innerText = today.toDateString()
+            if (msg.username == chatBoxUsername.innerText) {
+                p.classList.add('current')
+                p2.classList.add('current')
+                p3.classList.add('current')
+                p.innerText = 'You'
+            } else if(msg.username == adminName) {
+                p.innerHTML = `${msg.username} <img style="vertical-align:baseline" width=10px height=10px src="/img/home/crown.svg" />`
+            }
+            div.appendChild(p)
+            p2.appendChild(p3)
+            div.appendChild(p2)
+            chatBoxContent.appendChild(div)
+        })
+    });
+</script>
+</body>
+</html>
